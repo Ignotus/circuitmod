@@ -15,23 +15,26 @@ public:
 
 public:
     ICircuit(const StateMap& inputValues, const StateMap& outputValues);
-
+    virtual ~ICircuit() {}
+    
     QList<QString> inputs() const;
     QList<QString> outputs() const;
 
     bool state(const QString& name) const;
 
-    virtual bool& operator[](const QString& name);
+    bool operator[](const QString& name) const;
 
 public slots:
-    virtual bool setSignal(const QString& name, bool value) = 0;
-    virtual bool setSignal(const StateMap& values) = 0;
+    bool setSignal(const QString& name, bool value);
 
 signals:
     void onOutputChanged(const QString& name, bool value);
 
 protected:
     void setState(const QString& name, bool value);
+    
+private:
+    virtual void update() = 0;
 
 private:
     StateMap m_inputs;
@@ -43,30 +46,55 @@ class IConfig : public boost::noncopyable
 public:
     const ICircuit::StateMap& inputs() const;
     const ICircuit::StateMap& outputs() const;
+    
+    QString key(const QString& name) const;
 
 protected:
     IConfig();
 
-    static QString key(const QString& name);
-
 protected:
     static int m_count;
+    int m_id;
 
     ICircuit::StateMap m_inputs;
     ICircuit::StateMap m_outputs;
 };
 
-#define DECLARE_CONFIG \
-    class Config : public IConfig \
+#define CONFIG(CLASS_NAME) Config##CLASS_NAME::instance()
+
+#define DECLARE_CIRCUIT_CLASS(CLASS_NAME) \
+    class CLASS_NAME : public ICircuit \
     { \
     public: \
-        static Config& instance() \
+        CLASS_NAME(); \
+        virtual ~CLASS_NAME(); \
+    \
+    private: \
+        virtual void update(); \
+    };\
+    CLASS_NAME::CLASS_NAME() \
+        : ICircuit(CONFIG(CLASS_NAME).inputs(), CONFIG(CLASS_NAME).outputs()) \
+    { \
+    } \
+    CLASS_NAME::~CLASS_NAME() {} \
+    \
+    void CLASS_NAME::update()
+        
+
+#define DECLARE_CONFIG(CLASS_NAME) \
+    class Config##CLASS_NAME : public IConfig \
+    { \
+    public: \
+        static Config##CLASS_NAME& instance() \
         { \
-            static Config obj; \
+            static Config##CLASS_NAME obj; \
             return obj; \
         } \
     private: \
-        Config(); \
+        Config##CLASS_NAME(); \
     }; \
-    Config::Config() \
+    Config##CLASS_NAME::Config##CLASS_NAME() \
         : IConfig()
+
+        
+#define KEY(CLASS_NAME, value) CONFIG(CLASS_NAME).key(value)

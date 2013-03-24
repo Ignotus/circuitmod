@@ -34,13 +34,9 @@ bool ICircuit::state(const QString& name) const
     throw std::logic_error(QString("Input or output not found: %1").arg(name).toStdString());
 }
 
-bool& ICircuit::operator[](const QString& name)
+bool ICircuit::operator[](const QString& name) const
 {
-    StateMap::Iterator it = m_inputs.find(name);
-    if (it == m_inputs.end())
-        throw std::logic_error(QString("Input not found: %1").arg(name).toStdString());
-    
-    return it.value();
+    return state(name);
 }
 
 void ICircuit::setState(const QString& name, bool value)
@@ -62,6 +58,18 @@ void ICircuit::setState(const QString& name, bool value)
     }
 }
 
+bool ICircuit::setSignal(const QString& name, bool value) {
+    StateMap::Iterator it = m_inputs.find(name);
+    if (it != m_inputs.end())
+    {
+        it.value() = value;
+        
+        update();
+    }
+    
+    return false;
+}
+
 
 int IConfig::m_count = 0;
 
@@ -69,11 +77,12 @@ IConfig::IConfig()
     : boost::noncopyable()
 {
     ++m_count;
+    m_id = m_count;
 }
 
-QString IConfig::key(const QString& name)
+QString IConfig::key(const QString& name) const
 {
-    return name + QString::number(m_count);
+    return name + QString::number(m_id);
 }
 
 const ICircuit::StateMap& IConfig::inputs() const

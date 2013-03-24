@@ -26,7 +26,12 @@ set(QT_USE_NETWORK TRUE)
 
 include(${QT_USE_FILE})
 
+add_subdirectory(circuits)
+
 file(GLOB SRCS "*.cpp" EXCEPT "main.cpp")
+
+SET(SRCS ${SRCS} ${CIRCUITS_HDRS})
+
 file(GLOB HDRS "*.h")
 
 file(GLOB UIS "*.ui")
@@ -39,4 +44,3 @@ target_link_libraries(circuitmod-core ${QT_LIBRARIES})
 
 add_executable(circuitmod main.cpp)
 target_link_libraries(circuitmod circuitmod-core)
-

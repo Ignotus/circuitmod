@@ -1,1 +1,1 @@
-create_test(and_circuit_test "")
+create_test(and2_circuit_test)
