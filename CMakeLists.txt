@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(circuitmod)
 
-add_definitions(-Wall -fexceptions)
+add_definitions(-std=c++0x -Wall -fexceptions)
 
 find_package(Qt4 REQUIRED)
 

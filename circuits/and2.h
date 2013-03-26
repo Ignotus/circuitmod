@@ -1,14 +1,15 @@
 #pragma once
 #include "icircuit.h"
 
-DECLARE_CONFIG(And2Circuit)
+DECLARE_CIRCUIT_CLASS(And2)
 {
-    m_inputs[key("A")] = false;
-    m_inputs[key("B")] = false;
-    m_outputs[key("Q")] = false;
+    setState(key("Q"), state(key("A")) && state(key("B")));
 }
 
-DECLARE_CIRCUIT_CLASS(And2Circuit)
+template<>
+void declareIO<And2>(IConfig& config)
 {
-    setState(KEY(And2Circuit, "Q"), state(KEY(And2Circuit, "A")) && state(KEY(And2Circuit, "B")));
+    config.declareInput("A");
+    config.declareInput("B");
+    config.declareOutput("Q");
 }

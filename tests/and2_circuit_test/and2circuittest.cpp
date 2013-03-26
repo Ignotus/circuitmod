@@ -6,7 +6,7 @@
 
 void And2CircuitTest::logicTestCase()
 {
-    And2Circuit circuit;
+    And2 circuit;
     const QList<QString>& input = circuit.inputs();
     const QList<QString>& output = circuit.outputs();
     
@@ -31,7 +31,7 @@ void And2CircuitTest::logicTestCase()
 
 void And2CircuitTest::signalTestCase()
 {
-    And2Circuit circuit;
+    And2 circuit;
     const QList<QString>& input = circuit.inputs();
     const QList<QString>& output = circuit.outputs();
     const QString& firstPortName = input[0];

@@ -24,17 +24,17 @@
 
 void CircuitTest::nand2Test()
 {
-    TEST_ELEMENT(NAnd2Circuit, !(i[k] && j[k]));
+    TEST_ELEMENT(NAnd2, !(i[k] && j[k]));
 }
 
 void CircuitTest::nor2Test()
 {
-    TEST_ELEMENT(NOr2Circuit, !(i[k] || j[k]));
+    TEST_ELEMENT(NOr2, !(i[k] || j[k]));
 }
 
 void CircuitTest::or2Test()
 {
-    TEST_ELEMENT(Or2Circuit, i[k] || j[k]);
+    TEST_ELEMENT(Or2, i[k] || j[k]);
 }
 
 QTEST_MAIN(CircuitTest)

@@ -1,14 +1,16 @@
 #pragma once
 #include "icircuit.h"
 
-DECLARE_CONFIG(Or2Circuit)
+DECLARE_CIRCUIT_CLASS(Or2)
 {
-    m_inputs[key("A")] = false;
-    m_inputs[key("B")] = false;
-    m_outputs[key("Q")] = false;
+    setState(key("Q"), state(key("A")) || state(key("B")));
 }
 
-DECLARE_CIRCUIT_CLASS(Or2Circuit)
+template<>
+void declareIO<Or2>(IConfig& config)
 {
-    setState(KEY(Or2Circuit, "Q"), state(KEY(Or2Circuit, "A")) || state(KEY(Or2Circuit, "B")));
+    config.declareInput("A");
+    config.declareInput("B");
+    config.declareOutput("Q");
 }
+

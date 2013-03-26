@@ -1,15 +1,14 @@
 #pragma once
 #include "icircuit.h"
 
-
-
-DECLARE_CONFIG
+DECLARE_CIRCUIT_CLASS(Not)
 {
-    m_inputs[key("A")] = false;
-    m_outputs[key("Q")] = true;
+    setState(key("Q"), !state(key("A")));
 }
 
-DECLARE_CIRCUIT_CLASS(NotCircuit)
+template<>
+void declareIO<Not>(IConfig& config)
 {
-    setState(KEY(NotCircuit, "Q"), !state(KEY(NotCircuit, "A")));
+    config.declareInput("A");
+    config.declareOutput("Q");
 }

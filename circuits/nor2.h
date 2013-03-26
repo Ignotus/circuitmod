@@ -1,14 +1,16 @@
 #pragma once
 #include "icircuit.h"
 
-DECLARE_CONFIG(NOr2Circuit)
+DECLARE_CIRCUIT_CLASS(NOr2)
 {
-    m_inputs[key("A")] = false;
-    m_inputs[key("B")] = false;
-    m_outputs[key("Q")] = true;
+    setState(key("Q"), !(state(key("A")) || state(key("B"))));
 }
 
-DECLARE_CIRCUIT_CLASS(NOr2Circuit)
+template<>
+void declareIO<NOr2>(IConfig& config)
 {
-    setState(KEY(NOr2Circuit, "Q"), !(state(KEY(NOr2Circuit, "A")) || state(KEY(NOr2Circuit, "B"))));
+    config.declareInput("A");
+    config.declareInput("B");
+    config.declareOutput("Q");
 }
+

@@ -1,14 +1,16 @@
 #pragma once
 #include "icircuit.h"
 
-DECLARE_CONFIG(NAnd2Circuit)
+DECLARE_CIRCUIT_CLASS(NAnd2)
 {
-    m_inputs[key("A")] = false;
-    m_inputs[key("B")] = false;
-    m_outputs[key("Q")] = true;
+    setState(key("Q"), !(state(key("A")) && state(key("B"))));
 }
 
-DECLARE_CIRCUIT_CLASS(NAnd2Circuit)
+template<>
+void declareIO<NAnd2>(IConfig& config)
 {
-    setState(KEY(NAnd2Circuit, "Q"), !(state(KEY(NAnd2Circuit, "A")) && state(KEY(NAnd2Circuit, "B"))));
+    config.declareInput("A");
+    config.declareInput("B");
+    config.declareOutput("Q");
 }
+
