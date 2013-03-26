@@ -52,8 +52,19 @@ void ICircuit::setState(const QString& name, bool value)
         if (it != m_inputs.end())
         {
             it.value() = value;
-
-            emit onOutputChanged(name, value);
+            
+            QMultiMap<QString, CircuitSlot>::iterator i = m_subscribers.find(name);
+            QMultiMap<QString, CircuitSlot>::iterator end = m_subscribers.end();
+            while (i != end && i.key() == name) {
+                CircuitSlot& slot = i.value();
+                if (slot)
+                {
+                    slot(value);
+                    ++i;
+                }
+                else
+                    i = m_subscribers.erase(i);
+            }
         }
     }
 }
@@ -65,32 +76,33 @@ bool ICircuit::setSignal(const QString& name, bool value) {
         it.value() = value;
         
         update();
+        return true;
     }
     
     return false;
 }
 
-
-int IConfig::m_count = 0;
-
-IConfig::IConfig()
-    : boost::noncopyable()
+void ICircuit::subscribe(const QString& output, const CircuitSlot& slot)
 {
-    ++m_count;
-    m_id = m_count;
+    if (m_outputs.contains(output))
+        m_subscribers.insertMulti(output, slot);
 }
 
-QString IConfig::key(const QString& name) const
+void ICircuit::unsubscribe(const QString& output, const CircuitSlot& slot)
 {
-    return name + QString::number(m_id);
+    m_subscribers.remove(output, slot);
 }
 
-const ICircuit::StateMap& IConfig::inputs() const
+void ICircuit::unsubscribe(const CircuitSlot& slot)
 {
-    return m_inputs;
-}
-
-const ICircuit::StateMap& IConfig::outputs() const
-{
-    return m_outputs;
+    QMultiMap<QString, CircuitSlot>::iterator it = m_subscribers.begin();
+    QMultiMap<QString, CircuitSlot>::iterator end = m_subscribers.end();
+    
+    for (; it != end; ++it)
+    {
+        if (it.value() == slot)
+        {
+            it = m_subscribers.erase(it);
+        }
+    }
 }

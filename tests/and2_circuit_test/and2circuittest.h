@@ -6,5 +6,4 @@ class And2CircuitTest : public QObject
     Q_OBJECT
 private slots:
     void logicTestCase();
-    void signalTestCase();
 };

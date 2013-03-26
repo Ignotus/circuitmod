@@ -29,25 +29,4 @@ void And2CircuitTest::logicTestCase()
     }
 }
 
-void And2CircuitTest::signalTestCase()
-{
-    And2 circuit;
-    const QList<QString>& input = circuit.inputs();
-    const QList<QString>& output = circuit.outputs();
-    const QString& firstPortName = input[0];
-    const QString& secondPortName = input[1];
-    const QString& outputPortName = output[0];
-    
-    QSignalSpy spy(&circuit, SIGNAL(onOutputChanged(const QString&, bool)));
-    
-    circuit.setSignal(firstPortName, false);
-    QCOMPARE(spy.count(), 1);
-    
-    circuit.setSignal(outputPortName, true);
-    QCOMPARE(spy.count(), 1);
-    
-    circuit.setSignal(secondPortName, true);
-    QCOMPARE(spy.count(), 2);
-}
-
 QTEST_MAIN(And2CircuitTest)

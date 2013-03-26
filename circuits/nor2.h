@@ -1,4 +1,5 @@
 #pragma once
+#include "config.h"
 #include "icircuit.h"
 
 DECLARE_CIRCUIT_CLASS(NOr2)

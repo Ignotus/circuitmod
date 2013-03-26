@@ -1,17 +1,10 @@
 #pragma once
-#include <map>
 #include <functional>
-#include <type_traits>
-
-#include <boost/noncopyable.hpp>
-
-#include <QObject>
 #include <QMap>
-#include <QPair>
+#include "circuitslot.h"
 
-class ICircuit : public QObject
+class ICircuit
 {
-    Q_OBJECT
 public:
     typedef QMap<QString, bool> StateMap;
 
@@ -26,11 +19,11 @@ public:
 
     bool operator[](const QString& name) const;
 
-public slots:
     bool setSignal(const QString& name, bool value);
-
-signals:
-    void onOutputChanged(const QString& name, bool value);
+    
+    void subscribe(const QString& output, const CircuitSlot& slot);
+    void unsubscribe(const QString& output, const CircuitSlot& slot);
+    void unsubscribe(const CircuitSlot& slot);
 
 protected:
     void setState(const QString& name, bool value);
@@ -41,61 +34,8 @@ private:
 private:
     StateMap m_inputs;
     StateMap m_outputs;
-};
-
-class IConfig;
-template<class T>
-void declareIO(IConfig& config);
-
-class IConfig : public boost::noncopyable
-{
-public:
-    const ICircuit::StateMap& inputs() const;
-    const ICircuit::StateMap& outputs() const;
     
-    QString key(const QString& name) const;
-
-protected:
-    IConfig();
-
-    void declareOutput(const QString& name)
-    {
-        m_outputs[key(name)] = false;
-    }
-    
-    void declareInput(const QString& name)
-    {
-        m_inputs[key(name)] = false;
-    }
-    
-protected:
-    static int m_count;
-    int m_id;
-
-private:
-    ICircuit::StateMap m_inputs;
-    ICircuit::StateMap m_outputs;
-    
-    template<class T>
-    friend void declareIO(IConfig&);
-};
-
-template<class T>
-class Config : public IConfig
-{
-public:
-    static Config<T>& instance()
-    {
-        static Config<T> obj;
-        return obj;
-    }
-    
-private:
-    Config()
-        : IConfig()
-    {
-        declareIO<T>(*this);
-    }
+    QMultiMap<QString, CircuitSlot> m_subscribers;
 };
 
 #define DECLARE_CIRCUIT_CLASS(CLASS_NAME) \
@@ -104,11 +44,11 @@ private:
     public: \
         CLASS_NAME(); \
         virtual ~CLASS_NAME(); \
-    \
-    private: \
         QString key(const QString& name) const; \
-        virtual void update(); \
+    private: \
+        virtual void update();\
     };\
+    \
     CLASS_NAME::CLASS_NAME() \
         : ICircuit(Config<CLASS_NAME>::instance().inputs(), \
                    Config<CLASS_NAME>::instance().outputs()) \

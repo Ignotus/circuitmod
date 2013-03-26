@@ -26,3 +26,4 @@ endfunction()
 
 add_subdirectory(and2_circuit_test)
 add_subdirectory(circuit_test)
+add_subdirectory(circuit_combination_test)
