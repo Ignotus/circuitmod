@@ -1,16 +1,12 @@
 #pragma once
 #include <QString>
-#include "icircuit.h"
-
-class IConfig;
-template<class T>
-void declareIO(IConfig& config);
+#include "typedefs.h"
 
 class IConfig
 {
 public:
-    const ICircuit::StateMap& inputs() const;
-    const ICircuit::StateMap& outputs() const;
+    const StateMap& inputs() const;
+    const StateMap& outputs() const;
     
     QString key(const QString& name) const;
 
@@ -25,8 +21,8 @@ protected:
     int m_id;
 
 private:
-    ICircuit::StateMap m_inputs;
-    ICircuit::StateMap m_outputs;
+    StateMap m_inputs;
+    StateMap m_outputs;
     
     
 private:
@@ -36,6 +32,9 @@ private:
     template<class T>
     friend void declareIO(IConfig&);
 };
+
+template<class T>
+void declareIO(IConfig& config);
 
 template<class T>
 class Config : public IConfig

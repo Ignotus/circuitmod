@@ -23,16 +23,22 @@ endif()
 set(QT_USE_QTGUI TRUE)
 set(QT_USE_QTCORE TRUE)
 set(QT_USE_NETWORK TRUE)
+set(QT_USE_QTOPENGL TRUE)
 
 include(${QT_USE_FILE})
 
-add_subdirectory(circuits)
+file(GLOB CIRCUITS_HDRS circuits/*.h)
+file(GLOB CIRCUITS_SRCS circuits/*.cpp)
+
+file(GLOB CIRCUITS_VIEW_SRCS views/*.cpp)
+file(GLOB CIRCUITS_VIEW_HDRS views/*.h)
 
 file(GLOB SRCS "*.cpp" EXCEPT "main.cpp")
 
-SET(SRCS ${SRCS} ${CIRCUITS_HDRS})
+SET(SRCS ${SRCS} ${CIRCUITS_SRCS} ${CIRCUITS_VIEW_SRCS})
 
 file(GLOB HDRS "*.h")
+SET(HDRS ${HDRS} ${CIRCUITS_HDRS} ${CIRCUITS_VIEW_HDRS})
 
 file(GLOB UIS "*.ui")
 

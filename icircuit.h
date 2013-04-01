@@ -2,12 +2,11 @@
 #include <functional>
 #include <QMap>
 #include "circuitslot.h"
+#include "config.h"
+#include "typedefs.h"
 
 class ICircuit
 {
-public:
-    typedef QMap<QString, bool> StateMap;
-
 public:
     ICircuit(const StateMap& inputValues, const StateMap& outputValues);
     virtual ~ICircuit() {}
@@ -47,8 +46,9 @@ private:
         QString key(const QString& name) const; \
     private: \
         virtual void update();\
-    };\
-    \
+    }
+    
+#define DECLARE_CIRCUIT_CLASS_IMPL(CLASS_NAME) \
     CLASS_NAME::CLASS_NAME() \
         : ICircuit(Config<CLASS_NAME>::instance().inputs(), \
                    Config<CLASS_NAME>::instance().outputs()) \

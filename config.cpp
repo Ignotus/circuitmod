@@ -8,12 +8,12 @@ IConfig::IConfig()
     m_id = m_count;
 }
 
-const ICircuit::StateMap& IConfig::inputs() const
+const StateMap& IConfig::inputs() const
 {
     return m_inputs;
 }
 
-const ICircuit::StateMap& IConfig::outputs() const
+const StateMap& IConfig::outputs() const
 {
     return m_outputs;
 }
