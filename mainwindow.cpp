@@ -11,13 +11,16 @@ MainWindow::MainWindow(QWidget *parent)
 {
     m_ui->setupUi(this);
     
-    EditorView *ev = new EditorView(this);
-    setCentralWidget(ev);
+    EditorView *ev = new EditorView;
     
     m_editorModel.reset(new EditorModel);
     m_editorModel->add(new And2);
 
     ev->setModel(m_editorModel.get());
+
+    ev->show();
+
+    setCentralWidget(ev);
 }
 
 MainWindow::~MainWindow()

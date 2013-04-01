@@ -1,5 +1,6 @@
 #include <typeinfo>
 #include <QFont>
+#include <QDebug>
 #include <QMouseEvent>
 #include "editorview.h"
 #include "editormodel.h"
@@ -10,8 +11,12 @@ EditorView::EditorView(QWidget *parent)
     : QGLWidget(parent)
     , m_isWidgetPressed(false)
     , m_model(NULL)
+    , m_width(width())
+    , m_height(height())
 {
-    
+    setFormat(QGLFormat(QGL::DoubleBuffer));
+    glDepthFunc(GL_LEQUAL);
+    updateGL();
 }
 
 void EditorView::setModel(EditorModel *model)
@@ -24,14 +29,13 @@ void EditorView::setModel(EditorModel *model)
     const EditorModel::CircuitVector& circuits = m_model->circuits();
 
     for (int i = 0, max = circuits.size(); i != max; ++i)
-    {
         m_circuitViews.push_back(constructCircuitView(circuits[0].get()));
-    }
 }
 
 
 void EditorView::initializeGL()
 {
+    qDebug() << Q_FUNC_INFO;
     qglClearColor(Qt::white);
 }
 
@@ -51,16 +55,29 @@ ICircuitView* EditorView::constructCircuitView(ICircuit *model)
 
 void EditorView::paintGL()
 {
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    qDebug() << Q_FUNC_INFO;
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, m_width, m_height, 0, 1, 0);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     foreach (ICircuitView *const view, m_circuitViews)
-    {
-        view->draw(QPoint(10, 10));
-    }
+        view->draw(QPoint(100, 100));
+
+    swapBuffers();
 }
 
 void EditorView::resizeGL(int width, int height)
 {
+    qDebug() << Q_FUNC_INFO;
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
     glViewport(0, 0, (GLint)width, (GLint)height);
+
+    m_width = width;
+    m_height = height;
 }
 
 void EditorView::mousePressEvent(QMouseEvent *e)
@@ -70,13 +87,12 @@ void EditorView::mousePressEvent(QMouseEvent *e)
 
 void EditorView::mouseReleaseEvent(QMouseEvent *e)
 {
-    if (!m_isWidgetPressed)
-        return;
-    
-    
+    m_isWidgetPressed = false;
+
 }
 
 void EditorView::mouseMoveEvent(QMouseEvent *e)
 {
-    m_isWidgetPressed = false;
+    if (!m_isWidgetPressed)
+        return;
 }

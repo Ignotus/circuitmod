@@ -4,10 +4,12 @@ project(circuitmod)
 add_definitions(-std=c++0x -Wall -fexceptions)
 
 find_package(Qt4 REQUIRED)
+find_package(OpenGL REQUIRED)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${OPENGL_INCLUDE_DIR}
 )
 
 SET(ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -46,7 +48,7 @@ qt4_wrap_cpp(MOC_HDRS ${HDRS})
 qt4_wrap_ui(UI_HDRS ${UIS})
 
 add_library(circuitmod-core STATIC ${SRCS} ${HDRS} ${MOC_HDRS} ${UI_HDRS})
-target_link_libraries(circuitmod-core ${QT_LIBRARIES})
+target_link_libraries(circuitmod-core ${QT_LIBRARIES} ${OPENGL_LIBRARIES})
 
 add_executable(circuitmod main.cpp)
 target_link_libraries(circuitmod circuitmod-core)

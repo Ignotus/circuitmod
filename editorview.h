@@ -29,5 +29,8 @@ private:
     bool m_isWidgetPressed;
     EditorModel *m_model;
     std::vector<ICircuitView*> m_circuitViews;
+
+    int m_width;
+    int m_height;
 };
 
