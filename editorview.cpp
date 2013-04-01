@@ -47,6 +47,7 @@ ICircuitView* EditorView::constructCircuitView(ICircuit *model)
     {
         ICircuitView *view = new And2View(this);
         view->setModel(model);
+        view->setBeginPoint(QPoint(100, 100));
         return view;
     }
     
@@ -64,7 +65,7 @@ void EditorView::paintGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     foreach (ICircuitView *const view, m_circuitViews)
-        view->draw(QPoint(100, 100));
+        view->draw();
 
     swapBuffers();
 }
@@ -83,6 +84,22 @@ void EditorView::resizeGL(int width, int height)
 void EditorView::mousePressEvent(QMouseEvent *e)
 {
     m_isWidgetPressed = true;
+   
+    const QPoint& current = e->pos();
+    foreach (ICircuitView *const element, m_circuitViews)
+    {
+        qDebug() << Q_FUNC_INFO << current << " " << element->border();
+        if (element->border().containsPoint(current, Qt::OddEvenFill))
+        {
+            element->select();
+            element->setMousePosition(current - element->beginPoint());
+        }
+        else
+            element->unselect();
+    }
+    
+    
+    updateGL();
 }
 
 void EditorView::mouseReleaseEvent(QMouseEvent *e)
@@ -95,4 +112,13 @@ void EditorView::mouseMoveEvent(QMouseEvent *e)
 {
     if (!m_isWidgetPressed)
         return;
+    
+    const QPoint& current = e->pos();
+    foreach (ICircuitView *const element, m_circuitViews)
+    {
+        if (element->isSelected())
+            element->setBeginPoint(current - element->mousePosition());
+    } 
+    
+    updateGL();
 }

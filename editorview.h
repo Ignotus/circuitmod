@@ -24,7 +24,6 @@ protected:
     
 private:
     ICircuitView* constructCircuitView(ICircuit *model);
-    
 private:
     bool m_isWidgetPressed;
     EditorModel *m_model;

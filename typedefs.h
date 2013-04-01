@@ -6,3 +6,4 @@ typedef QMap<QString, bool> StateMap;
 
 const int CIRCUIT_HEIGHT = 40;
 const int CIRCUIT_WIDTH = 30;
+const int WIRE_LENGTH = 7;

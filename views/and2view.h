@@ -4,7 +4,9 @@
 class And2View : public ICircuitView
 {
 public:
-    And2View(QWidget *parent = 0);
+    And2View(EditorView *parent = 0);
 
-    void draw(const QPoint& begin);
+    void draw();
+    
+    void drawBorder();
 };
