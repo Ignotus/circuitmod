@@ -8,6 +8,11 @@ IConfig::IConfig()
     m_id = m_count;
 }
 
+int IConfig::id() const
+{
+    return m_id;
+}
+
 const StateMap& IConfig::inputs() const
 {
     return m_inputs;
@@ -16,6 +21,11 @@ const StateMap& IConfig::inputs() const
 const StateMap& IConfig::outputs() const
 {
     return m_outputs;
+}
+
+int IConfig::incCount()
+{
+    return ++m_count;
 }
 
 QString IConfig::key(const QString& name) const

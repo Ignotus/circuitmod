@@ -1,3 +1,5 @@
+#include <QToolBar>
+#include <QIcon>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "editorview.h"
@@ -18,9 +20,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     ev->setModel(m_editorModel.get());
 
-    ev->show();
-
     setCentralWidget(ev);
+    
+    QAction *and2Selector = m_ui->toolBar->addAction(QIcon(), "And2");
+    and2Selector->setProperty("type", QString(typeid(And2).name()));
+    and2Selector->setCheckable(true);
+    
+    connect(and2Selector, SIGNAL(triggered(bool)), ev, SLOT(onElementAdded()));
 }
 
 MainWindow::~MainWindow()

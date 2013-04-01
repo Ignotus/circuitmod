@@ -2,6 +2,7 @@
 #include <QFont>
 #include <QDebug>
 #include <QMouseEvent>
+#include <QAction>
 #include "editorview.h"
 #include "editormodel.h"
 #include "circuits/circuits.h"
@@ -13,8 +14,11 @@ EditorView::EditorView(QWidget *parent)
     , m_model(NULL)
     , m_width(width())
     , m_height(height())
+    , m_selectedCircuit(NULL)
 {
     setFormat(QGLFormat(QGL::DoubleBuffer));
+    setFocusPolicy(Qt::ClickFocus);
+    
     glDepthFunc(GL_LEQUAL);
     updateGL();
 }
@@ -35,7 +39,6 @@ void EditorView::setModel(EditorModel *model)
 
 void EditorView::initializeGL()
 {
-    qDebug() << Q_FUNC_INFO;
     qglClearColor(Qt::white);
 }
 
@@ -47,7 +50,6 @@ ICircuitView* EditorView::constructCircuitView(ICircuit *model)
     {
         ICircuitView *view = new And2View(this);
         view->setModel(model);
-        view->setBeginPoint(QPoint(100, 100));
         return view;
     }
     
@@ -56,7 +58,6 @@ ICircuitView* EditorView::constructCircuitView(ICircuit *model)
 
 void EditorView::paintGL()
 {
-    qDebug() << Q_FUNC_INFO;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -72,7 +73,6 @@ void EditorView::paintGL()
 
 void EditorView::resizeGL(int width, int height)
 {
-    qDebug() << Q_FUNC_INFO;
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glViewport(0, 0, (GLint)width, (GLint)height);
@@ -83,21 +83,21 @@ void EditorView::resizeGL(int width, int height)
 
 void EditorView::mousePressEvent(QMouseEvent *e)
 {
+    setFocus();
     m_isWidgetPressed = true;
    
     const QPoint& current = e->pos();
+    
     foreach (ICircuitView *const element, m_circuitViews)
     {
-        qDebug() << Q_FUNC_INFO << current << " " << element->border();
         if (element->border().containsPoint(current, Qt::OddEvenFill))
         {
             element->select();
             element->setMousePosition(current - element->beginPoint());
         }
-        else
+        else if (e->modifiers() != Qt::SHIFT)
             element->unselect();
     }
-    
     
     updateGL();
 }
@@ -106,11 +106,30 @@ void EditorView::mouseReleaseEvent(QMouseEvent *e)
 {
     m_isWidgetPressed = false;
 
+    if (m_selectedCircuit != NULL)
+    {
+        
+        ICircuit *c = EditorModel::construct(m_selectedCircuit->property("type").toString());
+        
+        m_model->add(c);
+        ICircuitView *v = constructCircuitView(c);
+        v->setBeginPoint(e->pos());
+        m_circuitViews.push_back(v);
+        v->select();
+        
+        if (e->modifiers() != Qt::SHIFT)
+        {
+            m_selectedCircuit->setChecked(false);
+            m_selectedCircuit = NULL;
+        }
+    }
+    
+    updateGL();
 }
 
 void EditorView::mouseMoveEvent(QMouseEvent *e)
 {
-    if (!m_isWidgetPressed)
+    if (!m_isWidgetPressed || e->modifiers() == Qt::SHIFT)
         return;
     
     const QPoint& current = e->pos();
@@ -121,4 +140,49 @@ void EditorView::mouseMoveEvent(QMouseEvent *e)
     } 
     
     updateGL();
+}
+
+void EditorView::keyPressEvent(QKeyEvent *e)
+{
+    if (e->key() != Qt::Key_Delete)
+        return;
+    
+    std::vector<ICircuitView*>::iterator it = m_circuitViews.begin();
+   
+    EditorModel::CircuitVector& circuits = m_model->circuits();
+    EditorModel::CircuitVector::iterator cit = circuits.begin();
+    
+    for (; cit != circuits.end();)
+    {
+        if ((*it)->isSelected())
+        {
+            it = m_circuitViews.erase(it);
+            cit = m_model->remove(cit);
+            
+        }
+        else
+        {
+            ++cit;
+            ++it;
+        }
+    }
+    
+    updateGL();
+}
+
+void EditorView::onElementAdded()
+{
+    QAction *action = qobject_cast<QAction*>(sender());
+    if (action == NULL)
+        return;
+    
+    const QString& type = action->property("type").toString();
+    if (!action->isChecked())
+    {
+        if (m_selectedCircuit != NULL && type == m_selectedCircuit->property("type").toString())
+            m_selectedCircuit = NULL;
+        return;
+    }
+    
+    m_selectedCircuit = action;
 }

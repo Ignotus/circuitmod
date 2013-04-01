@@ -3,6 +3,7 @@
 #include <memory>
 
 class ICircuit;
+class QString;
 class EditorModel 
 {
 public:
@@ -12,10 +13,12 @@ public:
     virtual ~EditorModel();
     
     void add(ICircuit *circuit);
-    void remove(int id);
-    
+    EditorModel::CircuitVector::iterator remove(CircuitVector::iterator it);
+   
+    CircuitVector& circuits();
     const CircuitVector& circuits() const;
-    
+   
+    static ICircuit* construct(const QString& name);
 private:
     CircuitVector m_circuits;
 };

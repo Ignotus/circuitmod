@@ -1,6 +1,7 @@
 #include "icircuitview.h"
 #include "typedefs.h"
 #include "editorview.h"
+#include "icircuit.h"
 
 ICircuitView::ICircuitView(EditorView *parent)
     : QObject(parent)
@@ -32,6 +33,8 @@ void ICircuitView::draw()
 {
     if (m_isSelected)
         drawBorder();
+    
+    drawText({m_begin.x(), m_begin.y() + CIRCUIT_HEIGHT + 10}, "E" + QString::number(m_model->id()));
 }
 
 void ICircuitView::setMousePosition(const QPoint& pos)

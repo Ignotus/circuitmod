@@ -1,10 +1,14 @@
 #include <stdexcept>
 #include "icircuit.h"
 
-ICircuit::ICircuit(const StateMap& inputValues, const StateMap& outputValues)
-    : m_inputs(inputValues)
-    , m_outputs(outputValues)
+ICircuit::ICircuit()
 {
+}
+
+void ICircuit::setIO(const StateMap& inputValues, const StateMap& outputValues)
+{
+    m_inputs = inputValues;
+    m_outputs = outputValues;
 }
 
 QList<QString> ICircuit::inputs() const

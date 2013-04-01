@@ -10,6 +10,8 @@ public:
     
     QString key(const QString& name) const;
 
+    int incCount();
+    int id() const;
 protected:
     IConfig();
 
@@ -19,7 +21,6 @@ protected:
 protected:
     static int m_count;
     int m_id;
-
 private:
     StateMap m_inputs;
     StateMap m_outputs;
@@ -40,13 +41,6 @@ template<class T>
 class Config : public IConfig
 {
 public:
-    static Config<T>& instance()
-    {
-        static Config<T> obj;
-        return obj;
-    }
-    
-private:
     Config()
         : IConfig()
     {

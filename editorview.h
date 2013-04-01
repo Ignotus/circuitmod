@@ -21,9 +21,14 @@ protected:
     void mousePressEvent(QMouseEvent *e);
     void mouseReleaseEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
+    void keyPressEvent(QKeyEvent *e);
     
 private:
     ICircuitView* constructCircuitView(ICircuit *model);
+    
+public slots:
+    void onElementAdded();
+    
 private:
     bool m_isWidgetPressed;
     EditorModel *m_model;
@@ -31,5 +36,7 @@ private:
 
     int m_width;
     int m_height;
+    
+    QAction *m_selectedCircuit;
 };
 
