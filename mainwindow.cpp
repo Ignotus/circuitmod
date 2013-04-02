@@ -5,7 +5,7 @@
 #include "editorview.h"
 #include "editormodel.h"
 
-#include "circuits/and2.h"
+#include "circuits/circuits.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -22,6 +22,10 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(ev);
     
     addActionForCircuit<And2>(ev, "And2");
+    addActionForCircuit<NAnd2>(ev, "NAnd2");
+    addActionForCircuit<Or2>(ev, "Or2");
+    addActionForCircuit<NOr2>(ev, "NOr2");
+    addActionForCircuit<Not>(ev, "Not");
 }
 
 void MainWindow::uncheckToolbar()

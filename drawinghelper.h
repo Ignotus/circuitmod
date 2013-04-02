@@ -19,5 +19,7 @@ struct DrawingHelper
     
     static void drawText(const QPoint& begin, const QString& text,
                          EditorView *view, const QColor& color = Qt::black);
+    
+    static void drawCircle(const QPoint& center, int radius, const QColor& color = Qt::black);
 };
 

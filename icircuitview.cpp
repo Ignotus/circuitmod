@@ -68,13 +68,31 @@ void ICircuitView::unselect()
     m_isSelected = false;
 }
 
-void ICircuitView::draw()
+void ICircuitView::drawImpl(const QVector<int>& inputPadding,
+                            const QVector<int>& outputPadding,
+                            const QString& text)
 {
+    const QPoint& begin = beginPoint();
+    const QPoint second{begin.x() + CIRCUIT_WIDTH, begin.y()};
+    const QPoint third{begin.x() + CIRCUIT_WIDTH, begin.y() + CIRCUIT_HEIGHT};
+    const QPoint fourth{begin.x(), begin.y() + CIRCUIT_HEIGHT};
+   
+    foreach (const int padding, outputPadding)
+        DrawingHelper::drawOutputWire({second.x(), second.y() + padding});
+    
+    foreach(const int padding, inputPadding)
+        DrawingHelper::drawInputWire({begin.x(), begin.y() + padding});
+    
+    DrawingHelper::drawPolygon(QPolygon({begin, second, third, fourth}), Qt::white);
+    DrawingHelper::drawPolygonBorder(QPolygon({begin, second, third, fourth}), Qt::black);
+    
     if (m_isSelected)
         drawBorder();
     
     DrawingHelper::drawText({m_begin.x(), m_begin.y() + CIRCUIT_HEIGHT + 10},
                              "E" + QString::number(m_model->id()), m_editor);
+    DrawingHelper::drawText(QPoint(begin.x() + CIRCUIT_WIDTH / 2, begin.y() + CIRCUIT_HEIGHT / 2),
+                            text, editor());
 }
 
 EditorView* ICircuitView::editor() const
@@ -85,6 +103,15 @@ EditorView* ICircuitView::editor() const
 void ICircuitView::setMousePosition(const QPoint& pos)
 {
     m_mousePosition = pos;
+}
+
+void ICircuitView::drawBorder()
+{
+    foreach (const QPoint& point, border())
+    {
+        DrawingHelper::drawRectangle(point, 3, Qt::black);
+        DrawingHelper::drawRectangle(point, 2, Qt::green);
+    }
 }
 
 bool ICircuitView::isSelected() const

@@ -65,6 +65,7 @@ void EditorView::paintGL()
     glLoadIdentity();
     glOrtho(0, m_width, m_height, 0, 1, 0);
     glEnable(GL_BLEND);
+    glEnable(GL_SMOOTH);
     
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

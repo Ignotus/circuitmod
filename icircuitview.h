@@ -19,10 +19,10 @@ public:
    
     const QPoint& beginPoint() const;
     const QPoint& mousePosition() const;
-    virtual void draw();
+    virtual void draw() = 0;
     
     virtual QPolygon border() const;
-    virtual void drawBorder() = 0;
+    virtual void drawBorder();
     
     void select();
     bool isSelected() const;
@@ -30,7 +30,12 @@ public:
     
     const QHash<QString, QPolygon>& inputs() const;
     const QHash<QString, QPolygon>& outputs() const;
+    
 protected:
+    void drawImpl(const QVector<int>& inputPadding,
+                  const QVector<int>& outputPadding,
+                  const QString& text);
+    
     EditorView* editor() const;
     
 private:

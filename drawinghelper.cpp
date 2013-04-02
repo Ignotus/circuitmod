@@ -1,3 +1,4 @@
+#include <cmath>
 #include <QtOpenGL>
 #include "drawinghelper.h"
 #include "editorview.h"
@@ -91,6 +92,28 @@ void DrawingHelper::drawLine(const QPoint& first, const QPoint& second, const QC
         setColor(color);
         glVertex2d(first.x(), first.y());
         glVertex2d(second.x(), second.y());
+    glEnd();
+}
+
+void DrawingHelper::drawCircle(const QPoint& center, int radius, const QColor& color)
+{
+    glBegin(GL_LINE_LOOP);
+        setColor(color);
+        for (int i = 0; i < 100; i++)
+        {
+            double angle = 2 * M_PI * i / 100;
+            glVertex2f(center.x() + radius * cos(angle), center.y() + radius * sin(angle));
+        }
+    glEnd();
+   
+    --radius;
+    glBegin(GL_POLYGON);
+        setColor(Qt::white);
+        for (int i = 0; i < 100; i++)
+        {
+            double angle = 2 * M_PI * i / 100;
+            glVertex2f(center.x() + radius * cos(angle), center.y() + radius * sin(angle));
+        }
     glEnd();
 }
 

@@ -7,6 +7,4 @@ public:
     And2View(EditorView *parent = 0);
 
     void draw();
-    
-    void drawBorder();
 };

@@ -50,12 +50,18 @@ ICircuitView* ElementAdder::constructCircuitView(ICircuit *model)
 {
     const std::type_info& info = typeid(*model);
     
+    ICircuitView *view = NULL;
     if (info == typeid(And2))
-    {
-        ICircuitView *view = new And2View(m_view);
-        view->setModel(model);
-        return view;
-    }
-    
-    return NULL;
+        view = new And2View(m_view);
+    else if (info == typeid(NAnd2))
+        view = new Nand2View(m_view);
+    else if (info == typeid(NOr2))
+        view = new Nor2View(m_view);
+    else if (info == typeid(Or2))
+        view = new Or2View(m_view);
+    else if (info == typeid(Not))
+        view = new NotView(m_view);
+        
+    view->setModel(model);
+    return view;
 }
