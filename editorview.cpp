@@ -7,6 +7,7 @@
 #include "editormodel.h"
 #include "drawinghelper.h"
 #include "icircuitview.h"
+#include "icircuit.h"
 
 EditorView::EditorView(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::DoubleBuffer), parent)
@@ -22,9 +23,14 @@ EditorView::EditorView(QWidget *parent)
     glDepthFunc(GL_LEQUAL);
 }
 
-const QVector<ICircuitView*>& EditorView::circuitViews() const
+const EditorView::CircuitViewCollection& EditorView::circuitViews() const
 {
     return m_circuitViews;
+}
+
+const EditorModel* EditorView::model() const
+{
+    return m_model;
 }
 
 void EditorView::setModel(EditorModel *model)
@@ -36,10 +42,14 @@ void EditorView::setModel(EditorModel *model)
     
     m_adder.reset(new ElementAdder(model, this));
 
-    const EditorModel::CircuitVector& circuits = m_model->circuits();
+    const EditorModel::CircuitCollection& circuits = m_model->circuits();
 
     for (int i = 0, max = circuits.size(); i != max; ++i)
-        m_circuitViews << m_adder->constructCircuitView(circuits[i].get());
+    {
+        ICircuit *circuit = circuits[i].get();
+        ICircuitView *view = m_adder->constructCircuitView(circuit);
+        m_circuitViews[circuit->id()] = view;
+    }
 }
 
 
@@ -61,8 +71,16 @@ void EditorView::paintGL()
     foreach (ICircuitView *const view, m_circuitViews)
         view->draw();
     
+    const QPoint& pos = mapFromGlobal(cursor().pos());
+    
+    m_wireManager.drawWires();
+    m_wireManager.drawTemporaryWire(pos);
+    
     if (!m_isWidgetPressed)
-        m_wireManager.selectIO(mapFromGlobal(cursor().pos()));
+    {
+        QString name;
+        m_wireManager.selectIO(pos, name);
+    }
     
     swapBuffers();
 }
@@ -79,11 +97,32 @@ void EditorView::resizeGL(int width, int height)
 
 void EditorView::mousePressEvent(QMouseEvent *e)
 {
+    if (e->button() == Qt::RightButton)
+    {
+        m_wireManager.clearPrevPoint();
+        updateGL();
+        return;
+    }
+        
     if (e->button() != Qt::LeftButton)
         return;
     
     setFocus();
     m_isWidgetPressed = true;
+   
+    QString name;
+    if (m_wireManager.selectIO(e->pos(), name))
+    {
+        const QPair<QString, int>& parsed = ICircuit::parseName(name);
+        
+        if (m_wireManager.hasPrevPoint())
+        {
+            m_wireManager.addWireTo(parsed.second, name);
+            m_wireManager.clearPrevPoint();
+        }
+        else
+            m_wireManager.setPrevPoint(parsed.second, name);
+    }
    
     if (m_adder->hasCurrentElement())
         return;
@@ -119,7 +158,7 @@ void EditorView::moveElements(const QPoint& pos)
 void EditorView::addElement(const QPoint& pos)
 {
     ICircuitView *v = m_adder->constructCurrentView(pos);
-    m_circuitViews.push_back(v);
+    m_circuitViews[v->model()->id()] = v;
     v->select();
 }
 
@@ -156,23 +195,28 @@ void EditorView::mouseMoveEvent(QMouseEvent *e)
 
 void EditorView::deleteSelectedElements()
 {
-    QVector<ICircuitView*>::iterator it = m_circuitViews.begin();
+    EditorModel::CircuitCollection& circuits = m_model->circuits();
+    auto cit = circuits.begin();
    
-    EditorModel::CircuitVector& circuits = m_model->circuits();
-    EditorModel::CircuitVector::iterator cit = circuits.begin();
-    
     for (; cit != circuits.end();)
     {
-        if ((*it)->isSelected())
+        const int id = (*cit)->id();
+        if (m_circuitViews[id]->isSelected())
         {
-            it = m_circuitViews.erase(it);
-            cit = m_model->remove(cit);
+            foreach (const std::shared_ptr<ICircuit>& circuit, m_model->circuits())
+            {
+                foreach (const QString& input, m_circuitViews[id]->model()->inputs())
+                {
+                    circuit->unsubscribe(CircuitSlot(m_circuitViews[id]->model(), input));
+                    m_wireManager.removeWireTo(ICircuit::parseName(input).second, input);
+                }
+            }
+            
+            cit = circuits.erase(cit);
+            m_circuitViews.remove(id);
         }
         else
-        {
             ++cit;
-            ++it;
-        }
     }
 }
 

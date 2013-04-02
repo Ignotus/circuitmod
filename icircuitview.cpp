@@ -48,6 +48,10 @@ void ICircuitView::setBeginPoint(const QPoint& begin)
     }
 }
 
+ICircuit* ICircuitView::model() const
+{
+    return m_model;
+}
 
 void ICircuitView::setModel(ICircuit *model)
 {

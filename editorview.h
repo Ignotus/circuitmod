@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <QGLWidget>
+#include <QHash>
 #include "wiremanager.h"
 #include "elementadder.h"
 
@@ -12,11 +13,15 @@ class EditorView : public QGLWidget
 {
     Q_OBJECT
 public:
+    typedef QHash<int, ICircuitView*> CircuitViewCollection;
+public:
     EditorView(QWidget *parent = 0);
     
     void setModel(EditorModel *model);
 
-    const QVector<ICircuitView*>& circuitViews() const;
+    const CircuitViewCollection& circuitViews() const;
+    
+    const EditorModel* model() const;
 protected:
     void initializeGL();
     void paintGL();
@@ -38,7 +43,7 @@ public slots:
 private:
     bool m_isWidgetPressed;
     EditorModel *m_model;
-    QVector<ICircuitView*> m_circuitViews;
+    CircuitViewCollection m_circuitViews;
 
     int m_width;
     int m_height;

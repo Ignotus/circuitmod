@@ -19,23 +19,23 @@ ICircuit* EditorModel::construct(const QString& name)
     return NULL;
 }
 
-EditorModel::CircuitVector& EditorModel::circuits()
+EditorModel::CircuitCollection& EditorModel::circuits()
 {
     return m_circuits;
 }
 
-const EditorModel::CircuitVector& EditorModel::circuits() const
+const EditorModel::CircuitCollection& EditorModel::circuits() const
 {
     return m_circuits;
 }
 
 void EditorModel::add(ICircuit *circuit)
 {
-    m_circuits.push_back(std::unique_ptr<ICircuit>(circuit));
+    m_circuits[circuit->id()].reset(circuit);
 }
 
-EditorModel::CircuitVector::iterator EditorModel::remove(EditorModel::CircuitVector::iterator it)
+void EditorModel::remove(int id)
 {
-    return m_circuits.erase(it);
+    m_circuits.remove(id);
 }
 

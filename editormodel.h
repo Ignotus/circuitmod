@@ -1,24 +1,24 @@
 #pragma once
-#include <vector>
 #include <memory>
+#include <QHash>
 
 class ICircuit;
 class QString;
 class EditorModel 
 {
 public:
-    typedef std::vector<std::unique_ptr<ICircuit> > CircuitVector;
+    typedef QHash<int, std::shared_ptr<ICircuit> > CircuitCollection;
 public:
     EditorModel();
     virtual ~EditorModel();
     
     void add(ICircuit *circuit);
-    EditorModel::CircuitVector::iterator remove(CircuitVector::iterator it);
+    void remove(int id);
    
-    CircuitVector& circuits();
-    const CircuitVector& circuits() const;
+    CircuitCollection& circuits();
+    const CircuitCollection& circuits() const;
    
     static ICircuit* construct(const QString& name);
 private:
-    CircuitVector m_circuits;
+    CircuitCollection m_circuits;
 };

@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <QStringList>
 #include "icircuit.h"
 
 ICircuit::ICircuit()
@@ -19,6 +20,17 @@ QList<QString> ICircuit::inputs() const
 QList<QString> ICircuit::outputs() const
 {
     return m_outputs.keys();
+}
+
+QPair<bool, IOType> ICircuit::find(const QString& name) const
+{
+    if (m_inputs.find(name) != m_inputs.end())
+        return qMakePair(true, INPUT);
+    
+    if (m_outputs.find(name) != m_outputs.end())
+        return qMakePair(true, OUTPUT);
+    
+    return qMakePair(false, UNKNOWN);
 }
 
 bool ICircuit::state(const QString& name) const
@@ -84,6 +96,12 @@ bool ICircuit::setSignal(const QString& name, bool value) {
     }
     
     return false;
+}
+
+QPair<QString, int> ICircuit::parseName(const QString& name)
+{
+    const QStringList& es = name.split('_');
+    return qMakePair(es[0], es[1].toInt());
 }
 
 void ICircuit::subscribe(const QString& output, const CircuitSlot& slot)

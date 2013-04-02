@@ -30,7 +30,7 @@ int IConfig::incCount()
 
 QString IConfig::key(const QString& name) const
 {
-    return name + QString::number(m_id);
+    return name + "_" + QString::number(m_id);
 }
 
 void IConfig::declareOutput(const QString& name)

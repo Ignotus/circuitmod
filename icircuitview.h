@@ -12,6 +12,8 @@ public:
     ICircuitView(EditorView *parent = 0);
     void setModel(ICircuit *model);
     
+    ICircuit* model() const;
+    
     void setBeginPoint(const QPoint& begin);
     void setMousePosition(const QPoint& pos);
    

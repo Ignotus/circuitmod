@@ -1,9 +1,17 @@
 #pragma once
 #include <functional>
 #include <QMap>
+#include <QPair>
 #include "circuitslot.h"
 #include "config.h"
 #include "typedefs.h"
+
+enum IOType
+{
+    INPUT,
+    OUTPUT,
+    UNKNOWN
+};
 
 class ICircuit
 {
@@ -14,6 +22,8 @@ public:
     void setIO(const StateMap& inputValues, const StateMap& outputValues);
     QList<QString> inputs() const;
     QList<QString> outputs() const;
+    
+    QPair<bool, IOType> find(const QString& name) const;
 
     bool state(const QString& name) const;
 
@@ -24,6 +34,9 @@ public:
     void subscribe(const QString& output, const CircuitSlot& slot);
     void unsubscribe(const QString& output, const CircuitSlot& slot);
     void unsubscribe(const CircuitSlot& slot);
+    
+    static QPair<QString, int> parseName(const QString& name);
+    
     virtual int id() const = 0;
 
 protected:
