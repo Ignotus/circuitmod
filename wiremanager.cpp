@@ -38,7 +38,7 @@ void WireManager::selectPrevPoint() const
 void WireManager::drawTemporaryWire(const QPoint& pos) const
 {
     if (hasPrevPoint())
-        DrawingHelper::drawLine(select(m_prevElementID, m_prevIOName), pos);
+        DrawingHelper::drawWire(select(m_prevElementID, m_prevIOName), pos);
 }
 
 void WireManager::drawWires() const
@@ -55,10 +55,10 @@ void WireManager::drawWires() const
         ICircuitView * const view1 = m_view->circuitViews()[first.first];
         ICircuitView * const view2 = m_view->circuitViews()[second.first];
         
-        const QPoint& firstPoint = view1->inputs()[first.second].first() + QPoint(3, 3);
-        const QPoint& secondPoint = view2->outputs()[second.second].first() + QPoint(3, 3);
+        const QPoint& secondPoint = view1->inputs()[first.second].first() + QPoint(4, 4);
+        const QPoint& firstPoint = view2->outputs()[second.second].first() + QPoint(4, 4);
         
-        DrawingHelper::drawLine(firstPoint, secondPoint);
+        DrawingHelper::drawWire(firstPoint, secondPoint);
     }
 }
 
@@ -99,14 +99,14 @@ QPoint WireManager::select(int elementID, const QString& ioname) const
     if (it != view->inputs().end())
     {
         DrawingHelper::drawPolygon(*it, Qt::red);
-        return it->first() + QPoint(3, 3);
+        return it->first() + QPoint(4, 4);
     }
     
     it = view->outputs().find(ioname);
     if (it != view->outputs().end())
     {
         DrawingHelper::drawPolygon(*it, Qt::green);
-        return it->first() + QPoint(3, 3);
+        return it->first() + QPoint(4, 4);
     }
     
     return QPoint();

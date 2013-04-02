@@ -41,6 +41,50 @@ void DrawingHelper::drawOutputWire(const QPoint& begin, const QColor& color)
     drawLine(begin, {begin.x() + WIRE_LENGTH, begin.y()}, color);
 }
 
+void DrawingHelper::drawWire(const QPoint& first, const QPoint& second, const QColor& color)
+{
+    if (first.x() < second.x())
+    {
+        if (first.y() == second.y())
+            drawLine(first, second, color);
+        else
+        {
+            const int x = (second.x() + first.x()) / 2;
+            
+            drawLine({x, std::min(second.y(), first.y())}, {x, std::max(second.y(), first.y())}, color);
+            drawLine({x, first.y()}, first, color);
+            drawLine({x, second.y()}, second, color);
+        }
+    }
+    else if (first.x() > second.x())
+    {
+        int y;
+        const int firstx = first.x() + 10;
+        const int secondx = second.x() - 10;
+        
+        if (first.x() - second.x() < CIRCUIT_WIDTH + 2 * WIRE_LENGTH + 20)
+        {
+            y = (first.y() + second.y()) / 2;
+        }
+        else if (first.y() <= second.y())
+        {
+            y = first.y() - CIRCUIT_HEIGHT;
+            if (y <= 0)
+                y = first.y() + CIRCUIT_HEIGHT;
+        }
+        else
+        {
+            y = first.y() + CIRCUIT_HEIGHT;
+        }
+
+        drawLine(first, {firstx, first.y()}, color);
+        drawLine(second, {secondx, second.y()}, color);
+        drawLine({firstx, first.y()}, {firstx, y}, color);
+        drawLine({secondx, second.y()}, {secondx, y}, color);
+        drawLine({firstx, y}, {secondx, y}, color);
+    }
+}
+
 void DrawingHelper::drawLine(const QPoint& first, const QPoint& second, const QColor& color)
 {
     glBegin(GL_LINES);
