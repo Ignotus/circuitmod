@@ -5,22 +5,21 @@
 #include <QAction>
 #include "editorview.h"
 #include "editormodel.h"
-#include "circuits/circuits.h"
-#include "views/views.h"
+#include "drawinghelper.h"
+#include "elementadder.h"
+#include "icircuitview.h"
 
 EditorView::EditorView(QWidget *parent)
-    : QGLWidget(parent)
+    : QGLWidget(QGLFormat(QGL::DoubleBuffer), parent)
     , m_isWidgetPressed(false)
     , m_model(NULL)
     , m_width(width())
     , m_height(height())
-    , m_selectedCircuit(NULL)
 {
-    setFormat(QGLFormat(QGL::DoubleBuffer));
     setFocusPolicy(Qt::ClickFocus);
+    setMouseTracking(true);
     
     glDepthFunc(GL_LEQUAL);
-    updateGL();
 }
 
 void EditorView::setModel(EditorModel *model)
@@ -29,31 +28,19 @@ void EditorView::setModel(EditorModel *model)
 
     if (!m_circuitViews.empty())
         m_circuitViews.clear();
+    
+    m_adder.reset(new ElementAdder(model, this));
 
     const EditorModel::CircuitVector& circuits = m_model->circuits();
 
     for (int i = 0, max = circuits.size(); i != max; ++i)
-        m_circuitViews.push_back(constructCircuitView(circuits[0].get()));
+        m_circuitViews << m_adder->constructCircuitView(circuits[i].get());
 }
 
 
 void EditorView::initializeGL()
 {
     qglClearColor(Qt::white);
-}
-
-ICircuitView* EditorView::constructCircuitView(ICircuit *model)
-{
-    const std::type_info& info = typeid(*model);
-    
-    if (info == typeid(And2))
-    {
-        ICircuitView *view = new And2View(this);
-        view->setModel(model);
-        return view;
-    }
-    
-    return NULL;
 }
 
 void EditorView::paintGL()
@@ -63,19 +50,20 @@ void EditorView::paintGL()
     glLoadIdentity();
     glOrtho(0, m_width, m_height, 0, 1, 0);
     glEnable(GL_BLEND);
+    
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     foreach (ICircuitView *const view, m_circuitViews)
         view->draw();
-
+    
     swapBuffers();
 }
 
 void EditorView::resizeGL(int width, int height)
 {
+    glViewport(0, 0, (GLint)width, (GLint)height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glViewport(0, 0, (GLint)width, (GLint)height);
 
     m_width = width;
     m_height = height;
@@ -83,9 +71,15 @@ void EditorView::resizeGL(int width, int height)
 
 void EditorView::mousePressEvent(QMouseEvent *e)
 {
+    if (e->button() != Qt::LeftButton)
+        return;
+    
     setFocus();
     m_isWidgetPressed = true;
    
+    if (m_adder->hasCurrentElement())
+        return;
+    
     const QPoint& current = e->pos();
     
     foreach (ICircuitView *const element, m_circuitViews)
@@ -102,25 +96,37 @@ void EditorView::mousePressEvent(QMouseEvent *e)
     updateGL();
 }
 
+void EditorView::moveElements(const QPoint& pos)
+{
+    foreach (ICircuitView *const element, m_circuitViews)
+    {
+        if (element->isSelected())
+        {
+            element->setBeginPoint(pos - element->mousePosition());
+            break;
+        }
+    }
+}
+
+void EditorView::addElement(const QPoint& pos)
+{
+    ICircuitView *v = m_adder->constructCurrentView(pos);
+    m_circuitViews.push_back(v);
+    v->select();
+}
+
 void EditorView::mouseReleaseEvent(QMouseEvent *e)
 {
     m_isWidgetPressed = false;
 
-    if (m_selectedCircuit != NULL)
+    if (m_adder->hasCurrentElement())
     {
-        
-        ICircuit *c = EditorModel::construct(m_selectedCircuit->property("type").toString());
-        
-        m_model->add(c);
-        ICircuitView *v = constructCircuitView(c);
-        v->setBeginPoint(e->pos());
-        m_circuitViews.push_back(v);
-        v->select();
+        addElement(e->pos());
         
         if (e->modifiers() != Qt::SHIFT)
         {
-            m_selectedCircuit->setChecked(false);
-            m_selectedCircuit = NULL;
+            emit uncheckActions();
+            m_adder->clear();
         }
     }
     
@@ -129,25 +135,19 @@ void EditorView::mouseReleaseEvent(QMouseEvent *e)
 
 void EditorView::mouseMoveEvent(QMouseEvent *e)
 {
-    if (!m_isWidgetPressed || e->modifiers() == Qt::SHIFT)
+    const QPoint& current = e->pos();
+    if (e->modifiers() == Qt::SHIFT)
         return;
     
-    const QPoint& current = e->pos();
-    foreach (ICircuitView *const element, m_circuitViews)
-    {
-        if (element->isSelected())
-            element->setBeginPoint(current - element->mousePosition());
-    } 
+    if (m_isWidgetPressed)
+        moveElements(current);
     
     updateGL();
 }
 
-void EditorView::keyPressEvent(QKeyEvent *e)
+void EditorView::deleteSelectedElements()
 {
-    if (e->key() != Qt::Key_Delete)
-        return;
-    
-    std::vector<ICircuitView*>::iterator it = m_circuitViews.begin();
+    QVector<ICircuitView*>::iterator it = m_circuitViews.begin();
    
     EditorModel::CircuitVector& circuits = m_model->circuits();
     EditorModel::CircuitVector::iterator cit = circuits.begin();
@@ -158,7 +158,6 @@ void EditorView::keyPressEvent(QKeyEvent *e)
         {
             it = m_circuitViews.erase(it);
             cit = m_model->remove(cit);
-            
         }
         else
         {
@@ -166,23 +165,31 @@ void EditorView::keyPressEvent(QKeyEvent *e)
             ++it;
         }
     }
+}
+
+void EditorView::keyPressEvent(QKeyEvent *e)
+{
+    if (e->key() != Qt::Key_Delete)
+        return;
+    
+    deleteSelectedElements();
     
     updateGL();
 }
 
-void EditorView::onElementAdded()
+void EditorView::onElementAdded(bool checked)
 {
     QAction *action = qobject_cast<QAction*>(sender());
     if (action == NULL)
         return;
     
     const QString& type = action->property("type").toString();
-    if (!action->isChecked())
+    if (!checked)
     {
-        if (m_selectedCircuit != NULL && type == m_selectedCircuit->property("type").toString())
-            m_selectedCircuit = NULL;
+        if (m_adder && type == m_adder->currentName())
+            m_adder->clear();
         return;
     }
     
-    m_selectedCircuit = action;
+    m_adder->setCurrentElement(type);
 }

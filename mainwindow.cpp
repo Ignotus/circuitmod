@@ -16,17 +16,47 @@ MainWindow::MainWindow(QWidget *parent)
     EditorView *ev = new EditorView;
     
     m_editorModel.reset(new EditorModel);
-    m_editorModel->add(new And2);
 
     ev->setModel(m_editorModel.get());
 
     setCentralWidget(ev);
     
-    QAction *and2Selector = m_ui->toolBar->addAction(QIcon(), "And2");
-    and2Selector->setProperty("type", QString(typeid(And2).name()));
-    and2Selector->setCheckable(true);
+    addActionForCircuit<And2>(ev, "And2");
+}
+
+void MainWindow::uncheckToolbar()
+{
+    foreach(QAction * const selector, m_toolBarActions)
+        selector->setChecked(false);
+}
+
+template<class T>
+void MainWindow::addActionForCircuit(EditorView *ev, const QString& text, const QIcon& icon)
+{
+    QAction *selector = m_ui->toolBar->addAction(icon, text);
+    selector->setProperty("type", QString(typeid(T).name()));
+    selector->setCheckable(true);
     
-    connect(and2Selector, SIGNAL(triggered(bool)), ev, SLOT(onElementAdded()));
+    connect(selector, SIGNAL(triggered(bool)), ev, SLOT(onElementAdded(bool)));
+    connect(selector, SIGNAL(triggered(bool)), this, SLOT(updateToolbar(bool)));
+    connect(ev, SIGNAL(uncheckActions()), this, SLOT(uncheckToolbar()));
+    m_toolBarActions.push_back(selector);
+}
+
+void MainWindow::updateToolbar(bool checked)
+{
+    if (!checked)
+        return;
+    
+    QAction *action = qobject_cast<QAction*>(sender());
+    if (action == NULL)
+        return;
+    
+    foreach(QAction * const selector, m_toolBarActions)
+    {
+        if (selector != action)
+            selector->setChecked(false);
+    }
 }
 
 MainWindow::~MainWindow()

@@ -1,10 +1,11 @@
 #pragma once
-
+#include <memory>
 #include <QGLWidget>
 
 class ICircuit;
 class EditorModel;
 class ICircuitView;
+class ElementAdder;
 class EditorView : public QGLWidget
 {
     Q_OBJECT
@@ -22,21 +23,25 @@ protected:
     void mouseReleaseEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
     void keyPressEvent(QKeyEvent *e);
-    
+
 private:
-    ICircuitView* constructCircuitView(ICircuit *model);
+    void deleteSelectedElements();
+    void moveElements(const QPoint& pos);
+    void addElement(const QPoint& pos);
     
 public slots:
-    void onElementAdded();
+    void onElementAdded(bool);
     
 private:
     bool m_isWidgetPressed;
     EditorModel *m_model;
-    std::vector<ICircuitView*> m_circuitViews;
+    QVector<ICircuitView*> m_circuitViews;
 
     int m_width;
     int m_height;
     
-    QAction *m_selectedCircuit;
+    std::shared_ptr<ElementAdder> m_adder;
+signals:
+    void uncheckActions();
 };
 

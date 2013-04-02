@@ -2,6 +2,7 @@
 #include "typedefs.h"
 #include "editorview.h"
 #include "icircuit.h"
+#include "drawinghelper.h"
 
 ICircuitView::ICircuitView(EditorView *parent)
     : QObject(parent)
@@ -34,7 +35,13 @@ void ICircuitView::draw()
     if (m_isSelected)
         drawBorder();
     
-    drawText({m_begin.x(), m_begin.y() + CIRCUIT_HEIGHT + 10}, "E" + QString::number(m_model->id()));
+    DrawingHelper::drawText({m_begin.x(), m_begin.y() + CIRCUIT_HEIGHT + 10},
+                             "E" + QString::number(m_model->id()), m_editor);
+}
+
+EditorView* ICircuitView::editor() const
+{
+    return m_editor;
 }
 
 void ICircuitView::setMousePosition(const QPoint& pos)
@@ -57,26 +64,6 @@ const QPoint& ICircuitView::mousePosition() const
     return m_mousePosition;
 }
 
-void ICircuitView::drawRectangle(const QPoint& center, int padding) const
-{
-    glBegin(GL_QUADS);
-        glVertex2d(center.x() - padding, center.y() - padding);
-        glVertex2d(center.x() + padding, center.y() - padding);
-        glVertex2d(center.x() + padding, center.y() + padding);
-        glVertex2d(center.x() - padding, center.y() + padding);
-    glEnd();
-}
-
-void ICircuitView::drawInputWire(const QPoint& end) const
-{
-    drawLine({end.x() - WIRE_LENGTH, end.y()}, end);
-}
-
-void ICircuitView::drawOutputWire(const QPoint& begin) const
-{
-    drawLine(begin, {begin.x() + WIRE_LENGTH, begin.y()});
-}
-
 QPolygon ICircuitView::border() const
 {
     const QPolygon poly({m_begin,
@@ -87,25 +74,4 @@ QPolygon ICircuitView::border() const
         {m_begin.x(), m_begin.y() + CIRCUIT_HEIGHT / 2}
     });
     return poly;
-}
-
-void ICircuitView::drawText(const QPoint& begin, const QString& text) const
-{
-    m_editor->renderText(begin.x(), begin.y(), text);
-}
-
-void ICircuitView::drawLine(const QPoint& first, const QPoint& second) const
-{
-    glVertex2d(first.x(), first.y());
-    glVertex2d(second.x(), second.y());
-}
-
-void ICircuitView::qglColor(const QColor& c) const
-{
-    m_editor->qglColor(c);
-}
-    
-QIcon ICircuitView::icon() const
-{
-    return QIcon();
 }
