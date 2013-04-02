@@ -12,7 +12,6 @@ And2View::And2View(EditorView *parent)
 
 void And2View::draw()
 {
-    qDebug() << Q_FUNC_INFO;
     const QPoint& begin = beginPoint();
     const QPoint second{begin.x() + CIRCUIT_WIDTH, begin.y()};
     const QPoint third{begin.x() + CIRCUIT_WIDTH, begin.y() + CIRCUIT_HEIGHT};

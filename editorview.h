@@ -1,6 +1,8 @@
 #pragma once
 #include <memory>
 #include <QGLWidget>
+#include "wiremanager.h"
+#include "elementadder.h"
 
 class ICircuit;
 class EditorModel;
@@ -13,7 +15,8 @@ public:
     EditorView(QWidget *parent = 0);
     
     void setModel(EditorModel *model);
-    
+
+    const QVector<ICircuitView*>& circuitViews() const;
 protected:
     void initializeGL();
     void paintGL();
@@ -40,7 +43,8 @@ private:
     int m_width;
     int m_height;
     
-    std::shared_ptr<ElementAdder> m_adder;
+    std::unique_ptr<ElementAdder> m_adder;
+    WireManager m_wireManager;
 signals:
     void uncheckActions();
 };

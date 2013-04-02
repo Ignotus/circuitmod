@@ -25,7 +25,9 @@ public:
     void select();
     bool isSelected() const;
     void unselect();
-
+    
+    const QHash<QString, QPolygon>& inputs() const;
+    const QHash<QString, QPolygon>& outputs() const;
 protected:
     EditorView* editor() const;
     
@@ -36,4 +38,7 @@ private:
 
     QPoint m_begin;
     QPoint m_mousePosition;
+    
+    QHash<QString, QPolygon> m_inputs;
+    QHash<QString, QPolygon> m_outputs;
 };

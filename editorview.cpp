@@ -6,7 +6,6 @@
 #include "editorview.h"
 #include "editormodel.h"
 #include "drawinghelper.h"
-#include "elementadder.h"
 #include "icircuitview.h"
 
 EditorView::EditorView(QWidget *parent)
@@ -15,11 +14,17 @@ EditorView::EditorView(QWidget *parent)
     , m_model(NULL)
     , m_width(width())
     , m_height(height())
+    , m_wireManager(this)
 {
     setFocusPolicy(Qt::ClickFocus);
     setMouseTracking(true);
     
     glDepthFunc(GL_LEQUAL);
+}
+
+const QVector<ICircuitView*>& EditorView::circuitViews() const
+{
+    return m_circuitViews;
 }
 
 void EditorView::setModel(EditorModel *model)
@@ -55,6 +60,9 @@ void EditorView::paintGL()
 
     foreach (ICircuitView *const view, m_circuitViews)
         view->draw();
+    
+    if (!m_isWidgetPressed)
+        m_wireManager.selectIO(mapFromGlobal(cursor().pos()));
     
     swapBuffers();
 }
@@ -141,6 +149,7 @@ void EditorView::mouseMoveEvent(QMouseEvent *e)
     
     if (m_isWidgetPressed)
         moveElements(current);
+        
     
     updateGL();
 }

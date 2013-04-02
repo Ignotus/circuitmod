@@ -10,10 +10,44 @@ ICircuitView::ICircuitView(EditorView *parent)
 {
 }
 
+namespace
+{
+    const int PADDING = 4;
+    QPolygon polygon(const QPoint& point)
+    {
+        return QPolygon({
+            {point + QPoint(-PADDING, -PADDING)},
+            {point + QPoint(PADDING, -PADDING)},
+            {point + QPoint(PADDING, PADDING)},
+            {point + QPoint(-PADDING, PADDING)}
+
+        });
+    }
+}
+
 void ICircuitView::setBeginPoint(const QPoint& begin)
 {
     m_begin = begin;
+    
+    const QList<QString>& inputs = m_model->inputs();
+    const QList<QString>& outputs = m_model->outputs();
+    
+    if (inputs.size() == 1)
+    {
+        m_inputs[inputs[0]] = polygon(beginPoint() + QPoint(-WIRE_LENGTH, CIRCUIT_HEIGHT / 2));
+    }
+    else if (inputs.size() == 2)
+    {
+        m_inputs[inputs[0]] = polygon(beginPoint() + QPoint(-WIRE_LENGTH, CIRCUIT_HEIGHT / 4));
+        m_inputs[inputs[1]] = polygon(beginPoint() + QPoint(-WIRE_LENGTH, CIRCUIT_HEIGHT * 3 / 4));
+    }
+    
+    if (outputs.size() == 1)
+    {
+        m_outputs[outputs[0]] = polygon(beginPoint() + QPoint(CIRCUIT_WIDTH + WIRE_LENGTH, CIRCUIT_HEIGHT / 2));
+    }
 }
+
 
 void ICircuitView::setModel(ICircuit *model)
 {
@@ -74,4 +108,14 @@ QPolygon ICircuitView::border() const
         {m_begin.x(), m_begin.y() + CIRCUIT_HEIGHT / 2}
     });
     return poly;
+}
+
+const QHash<QString, QPolygon>& ICircuitView::inputs() const
+{
+    return m_inputs;
+}
+
+const QHash<QString, QPolygon>& ICircuitView::outputs() const
+{
+    return m_outputs;
 }
