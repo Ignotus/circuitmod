@@ -100,6 +100,13 @@ void EditorView::mousePressEvent(QMouseEvent *e)
     if (e->button() == Qt::RightButton)
     {
         m_wireManager.clearPrevPoint();
+        
+        QString name;
+        if (m_wireManager.selectIO(e->pos(), name))
+        {
+            const QPair<QString, int>& parsed = ICircuit::parseName(name);
+            m_wireManager.removeWireTo(parsed.second, name);
+        }
         updateGL();
         return;
     }
