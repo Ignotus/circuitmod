@@ -145,7 +145,7 @@ void DrawingHelper::drawPolygonBorder(const QPolygon& poly, const QColor& color)
 }
 
 void DrawingHelper::drawText(const QPoint& begin, const QString& text,
-                             EditorView *view, const QColor& color)
+                             QGLWidget *view, const QColor& color)
 {
     setColor(color);
     view->renderText(begin.x(), begin.y(), text);

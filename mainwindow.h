@@ -9,6 +9,8 @@ namespace Ui
 
 class EditorModel;
 class EditorView;
+class QTimer;
+class SimulationWidget;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -26,10 +28,14 @@ private slots:
     void uncheckToolbar();
     void simulate();
     void onSignalChanged(int, bool);
+    void sendSignal();
+    void stop();
     
 private:
     Ui::MainWindow *m_ui;
     std::unique_ptr<EditorModel> m_editorModel;
     
     std::vector<QAction*> m_toolBarActions;
+    QTimer *m_timer;
+    SimulationWidget *m_simuWidget;
 };

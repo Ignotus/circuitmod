@@ -22,6 +22,7 @@ public:
     static ICircuit* construct(const QString& name);
     
     CircuitCollection& inputs();
+    CircuitCollection& outputs();
 signals:
     void signalChanged(int, bool);
     

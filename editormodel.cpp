@@ -53,6 +53,11 @@ EditorModel::CircuitCollection& EditorModel::inputs()
     return m_inputs;
 }
 
+EditorModel::CircuitCollection& EditorModel::outputs()
+{
+    return m_outputs;
+}
+
 void EditorModel::add(ICircuit *circuit)
 {
     std::shared_ptr<ICircuit> ptr(circuit);

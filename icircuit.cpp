@@ -5,6 +5,7 @@
 
 ICircuit::ICircuit()
     : QObject(0)
+    , m_firstCall(true)
 {
 }
 
@@ -62,8 +63,6 @@ void ICircuit::setState(const QString& name, bool value)
     StateMap::Iterator it = m_inputs.find(name);
     if (it != m_inputs.end())
     {
-        qDebug() << Q_FUNC_INFO << "Setting input state:" << value
-                 << "for id" << id();
         it.value() = value;
     }
     else
@@ -71,9 +70,11 @@ void ICircuit::setState(const QString& name, bool value)
         it = m_outputs.find(name);
         if (it != m_outputs.end())
         {
-            qDebug() << Q_FUNC_INFO << "Setting output state:" << value
-                     << "for id" << id();
+            if (it.value() == value && !m_firstCall)
+                return;
+            
             it.value() = value;
+            m_firstCall = false;
             
             QMultiMap<QString, CircuitSlot>::iterator i = m_subscribers.find(name);
             QMultiMap<QString, CircuitSlot>::iterator end = m_subscribers.end();
@@ -112,7 +113,6 @@ QPair<QString, int> ICircuit::parseName(const QString& name)
 
 void ICircuit::subscribe(const QString& output, const CircuitSlot& slot)
 {
-    qDebug() << Q_FUNC_INFO << output;
     if (m_outputs.contains(output))
     {
         qDebug() << Q_FUNC_INFO << "Subscribing signal" << output << "in" << id();

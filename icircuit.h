@@ -50,6 +50,8 @@ private:
     StateMap m_outputs;
     
     QMultiMap<QString, CircuitSlot> m_subscribers;
+    
+    bool m_firstCall;
 };
 
 #define DECLARE_CIRCUIT_CLASS(CLASS_NAME) \

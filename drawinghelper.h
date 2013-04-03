@@ -1,6 +1,7 @@
 #pragma once
 #include <QColor>
 
+class QGLWidget;
 class QPolygon;
 class QPoint;
 class EditorView;
@@ -18,7 +19,7 @@ struct DrawingHelper
     static void drawPolygonBorder(const QPolygon& poly, const QColor& color = Qt::black);
     
     static void drawText(const QPoint& begin, const QString& text,
-                         EditorView *view, const QColor& color = Qt::black);
+                         QGLWidget *view, const QColor& color = Qt::black);
     
     static void drawCircle(const QPoint& center, int radius, const QColor& color = Qt::black);
 };
