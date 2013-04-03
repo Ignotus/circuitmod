@@ -4,3 +4,5 @@
 #include "nor2.h"
 #include "not.h"
 #include "or2.h"
+#include "input.h"
+#include "output.h"

@@ -29,6 +29,9 @@ void ICircuitView::setBeginPoint(const QPoint& begin)
 {
     m_begin = begin;
     
+    if (m_model == NULL)
+        return;
+    
     const QList<QString>& inputs = m_model->inputs();
     const QList<QString>& outputs = m_model->outputs();
     
@@ -89,8 +92,9 @@ void ICircuitView::drawImpl(const QVector<int>& inputPadding,
     if (m_isSelected)
         drawBorder();
     
-    DrawingHelper::drawText({m_begin.x(), m_begin.y() + CIRCUIT_HEIGHT + 10},
-                             "E" + QString::number(m_model->id()), m_editor);
+    if (m_model != NULL)
+        DrawingHelper::drawText({m_begin.x(), m_begin.y() + CIRCUIT_HEIGHT + 10},
+                                "E" + QString::number(m_model->id()), m_editor);
     DrawingHelper::drawText(QPoint(begin.x() + CIRCUIT_WIDTH / 2, begin.y() + CIRCUIT_HEIGHT / 2),
                             text, editor());
 }

@@ -83,12 +83,12 @@ void WireManager::addWireTo(int elementID, const QString& ioname)
     if (res1.second == INPUT)
     {
         m_wires[qMakePair(m_prevElementID, m_prevIOName)] = qMakePair(elementID, ioname);
-        view1->model()->subscribe(m_prevIOName, CircuitSlot(view2->model(), ioname));
+        view2->model()->subscribe(ioname, CircuitSlot(view1->model(), m_prevIOName));
     }
     else
     {
         m_wires[qMakePair(elementID, ioname)] = qMakePair(m_prevElementID, m_prevIOName);
-        view2->model()->subscribe(ioname, CircuitSlot(view1->model(), m_prevIOName));
+        view1->model()->subscribe(m_prevIOName, CircuitSlot(view2->model(), ioname));
     }
 }
 

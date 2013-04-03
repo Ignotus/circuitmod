@@ -61,6 +61,10 @@ ICircuitView* ElementAdder::constructCircuitView(ICircuit *model)
         view = new Or2View(m_view);
     else if (info == typeid(Not))
         view = new NotView(m_view);
+    else if (info == typeid(Input))
+        view = new InputView(m_view);
+    else if (info == typeid(Output))
+        view = new OutputView(m_view);
         
     view->setModel(model);
     return view;

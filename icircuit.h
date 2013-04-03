@@ -13,7 +13,7 @@ enum IOType
     UNKNOWN
 };
 
-class ICircuit
+class ICircuit : public QObject
 {
 public:
     ICircuit();

@@ -1,5 +1,6 @@
 #include <QToolBar>
 #include <QIcon>
+#include <QDebug>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "editorview.h"
@@ -16,22 +17,39 @@ MainWindow::MainWindow(QWidget *parent)
     EditorView *ev = new EditorView;
     
     m_editorModel.reset(new EditorModel);
+    
+    connect(m_editorModel.get(),
+            SIGNAL(signalChanged(int, bool)),
+            this,
+            SLOT(onSignalChanged(int,bool)));
 
     ev->setModel(m_editorModel.get());
 
     setCentralWidget(ev);
+    
+    m_ui->toolBar->addAction("Simulate", this, SLOT(simulate()));
+    
+    m_ui->toolBar->addSeparator();
     
     addActionForCircuit<And2>(ev, "And2");
     addActionForCircuit<NAnd2>(ev, "NAnd2");
     addActionForCircuit<Or2>(ev, "Or2");
     addActionForCircuit<NOr2>(ev, "NOr2");
     addActionForCircuit<Not>(ev, "Not");
+    
+    addActionForCircuit<Input>(ev, "In");
+    addActionForCircuit<Output>(ev, "Out");
 }
 
 void MainWindow::uncheckToolbar()
 {
     foreach(QAction * const selector, m_toolBarActions)
         selector->setChecked(false);
+}
+
+void MainWindow::onSignalChanged(int id, bool value)
+{
+    qDebug() << Q_FUNC_INFO << id << value;
 }
 
 template<class T>
@@ -60,6 +78,23 @@ void MainWindow::updateToolbar(bool checked)
     {
         if (selector != action)
             selector->setChecked(false);
+    }
+}
+
+void MainWindow::simulate()
+{
+    EditorModel::CircuitCollection& inputs = m_editorModel->inputs();
+    
+    for (int k = 0; k < 10; ++k)
+    {
+        
+        QHashIterator<int, std::shared_ptr<ICircuit>> i(inputs);
+        
+        while (i.hasNext())
+        {
+            i.next();
+            qobject_cast<Input*>(i.value().get())->onSignal(rand() % 2 == 0 ? true : false);
+        }
     }
 }
 

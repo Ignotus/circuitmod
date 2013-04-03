@@ -24,6 +24,8 @@ private:
 private slots:
     void updateToolbar(bool);
     void uncheckToolbar();
+    void simulate();
+    void onSignalChanged(int, bool);
     
 private:
     Ui::MainWindow *m_ui;

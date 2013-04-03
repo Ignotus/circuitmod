@@ -1,8 +1,10 @@
 #include <stdexcept>
 #include <QStringList>
+#include <QDebug>
 #include "icircuit.h"
 
 ICircuit::ICircuit()
+    : QObject(0)
 {
 }
 
@@ -60,13 +62,17 @@ void ICircuit::setState(const QString& name, bool value)
     StateMap::Iterator it = m_inputs.find(name);
     if (it != m_inputs.end())
     {
+        qDebug() << Q_FUNC_INFO << "Setting input state:" << value
+                 << "for id" << id();
         it.value() = value;
     }
     else
     {
         it = m_outputs.find(name);
-        if (it != m_inputs.end())
+        if (it != m_outputs.end())
         {
+            qDebug() << Q_FUNC_INFO << "Setting output state:" << value
+                     << "for id" << id();
             it.value() = value;
             
             QMultiMap<QString, CircuitSlot>::iterator i = m_subscribers.find(name);
@@ -106,8 +112,12 @@ QPair<QString, int> ICircuit::parseName(const QString& name)
 
 void ICircuit::subscribe(const QString& output, const CircuitSlot& slot)
 {
+    qDebug() << Q_FUNC_INFO << output;
     if (m_outputs.contains(output))
+    {
+        qDebug() << Q_FUNC_INFO << "Subscribing signal" << output << "in" << id();
         m_subscribers.insertMulti(output, slot);
+    }
 }
 
 void ICircuit::unsubscribe(const QString& output, const CircuitSlot& slot)

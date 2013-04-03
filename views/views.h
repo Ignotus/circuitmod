@@ -4,3 +4,5 @@
 #include "nor2view.h"
 #include "or2view.h"
 #include "notview.h"
+#include "inputview.h"
+#include "outputview.h"
