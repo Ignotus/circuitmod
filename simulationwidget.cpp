@@ -1,19 +1,35 @@
 #include <QDebug>
 #include <QMoveEvent>
+#include <QScrollArea>
+#include <ctime>
 #include "simulationwidget.h"
 #include "typedefs.h"
 #include "drawinghelper.h"
 
 SimulationWidget::SimulationWidget(QWidget* parent)
     : QGLWidget(QGLFormat(QGL::DoubleBuffer), parent)
-    , m_width(width())
-    , m_height(height())
 {
+    setAutoBufferSwap(true);
 }
 
 void SimulationWidget::addData(int id , bool value)
 {
     m_data[id] << value;
+    
+    const int size = m_data.begin()->size();
+    const int count = m_data.size();
+    
+    const int fwidth = size * CIRCUIT_WIDTH;
+    const int fheight = count * CIRCUIT_HEIGHT;
+    const int wwidth = width();
+    const int wheight = height();
+    if (wwidth < fwidth || wheight < fheight)
+    {
+        const int w = std::max(wwidth, fwidth);
+        const int h = std::max(wheight, fheight);
+        parentWidget()->setMinimumSize(w, h);
+        resize(w, h);
+    }
 }
 
 void SimulationWidget::clearData()
@@ -29,40 +45,26 @@ void SimulationWidget::initializeGL()
 void SimulationWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0, m_width, m_height, 0, 1, 0);
+    
+    const int wwidth = width();
+    const int wheight = height();
+    glOrtho(0, wwidth, wheight, 0, 1, 0);
     glEnable(GL_BLEND);
     glEnable(GL_SMOOTH);
     
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     if (m_data.begin() == m_data.end())
-    {
-        swapBuffers();
         return;
-    }
     
-    const int size = m_data.begin()->size();
-    const int count = m_data.size();
-    
-    const int width = size * CIRCUIT_WIDTH;
-    const int height = count * CIRCUIT_HEIGHT;
-    
-    if (m_width < width || m_height < height)
-    {
-        const int w = std::max(m_width, width);
-        const int h = std::max(height, m_height);
-        parentWidget()->setMinimumSize(w, h);
-        resize(w, h);
-        return;
-    }
-    
-    for (int i = 0; i < count - 1; ++i)
+    for (int i = 0, max = m_data.size() - 1; i < max; ++i)
     {
         const int y = (i + 1) * CIRCUIT_HEIGHT;
         
-        DrawingHelper::drawLine({0, y}, {m_width, y});
+        DrawingHelper::drawLine({0, y}, {wwidth, y});
     }
     
     int i = 0;
@@ -74,7 +76,7 @@ void SimulationWidget::paintGL()
         const int y_max = (i + 1) * CIRCUIT_HEIGHT - 5;
         const int y_min = i * CIRCUIT_HEIGHT + 5;
         
-        DrawingHelper::drawText({5, y_min + 15}, "E_" + QString::number(it.key()), this);
+        DrawingHelper::drawText({5, y_min + 15}, "E" + QString::number(it.key()), this);
         
         bool prevSignal = false;
         for (int k = 0, max = signal.size(); k != max; ++k)
@@ -93,22 +95,11 @@ void SimulationWidget::paintGL()
         }
         ++i;
     }
-    
-    swapBuffers();
-}
-
-void SimulationWidget::moveEvent(QMoveEvent *event)
-{
-    updateGL();
 }
 
 void SimulationWidget::resizeGL(int width, int height)
 {
-    qDebug() << Q_FUNC_INFO;
     glViewport(0, 0, (GLint)width, (GLint)height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    
-    m_height = height;
-    m_width = width;
 }

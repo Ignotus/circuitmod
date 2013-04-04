@@ -32,8 +32,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCentralWidget(ev);
     
-    m_ui->toolBar->addAction("Simulate", this, SLOT(simulate()));
-    m_ui->toolBar->addAction("Stop", this, SLOT(stop()));
+    QAction *simu = m_ui->toolBar->addAction(style()->standardIcon(QStyle::SP_MediaPlay), "Simulate", this, SLOT(simulate()));
+    simu->setCheckable(true);
+    
+    m_ui->toolBar->addAction(style()->standardIcon(QStyle::SP_MediaStop), "Stop", this, SLOT(stop()));
     
     m_ui->toolBar->addSeparator();
     
@@ -46,7 +48,9 @@ MainWindow::MainWindow(QWidget *parent)
     addActionForCircuit<Input>(ev, "In");
     addActionForCircuit<Output>(ev, "Out");
    
-    m_simuWidget = new SimulationWidget(m_ui->scrollAreaWidgetContents);
+    m_simuWidget = new SimulationWidget(m_ui->dockWidget);
+    
+    m_ui->verticalLayout_3->addWidget(m_simuWidget);
     
     m_ui->scrollAreaWidgetContents->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     m_ui->scrollAreaWidgetContents->resize(m_ui->scrollArea->size().width() , m_ui->scrollArea->size().height());
@@ -57,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::stop()
 {
+    updateToolbar(true);
     if (m_timer)
     {
         m_timer->stop();
@@ -114,7 +119,6 @@ void MainWindow::sendSignal()
         {
             i.next();
             
-            
             const bool sig = rand() % 2 == 0 ? true : false;
             qDebug() << Q_FUNC_INFO << "Input" << i.value()->id() << sig;
             m_simuWidget->addData(i.value()->id(), sig);
@@ -141,6 +145,13 @@ void MainWindow::sendSignal()
 
 void MainWindow::simulate()
 {
+    QAction *sndr = qobject_cast<QAction*>(sender());
+    if (sndr == NULL)
+        return;
+    
+    sndr->setChecked(true);
+    
+    updateToolbar(true);
     m_simuWidget->clearData();
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(sendSignal()));

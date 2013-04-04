@@ -95,7 +95,7 @@ void ICircuitView::drawImpl(const QVector<int>& inputPadding,
     if (m_model != NULL)
         DrawingHelper::drawText({m_begin.x(), m_begin.y() + CIRCUIT_HEIGHT + 10},
                                 "E" + QString::number(m_model->id()), m_editor);
-    DrawingHelper::drawText(QPoint(begin.x() + CIRCUIT_WIDTH / 2, begin.y() + CIRCUIT_HEIGHT / 2),
+    DrawingHelper::drawText(QPoint(begin.x() + CIRCUIT_WIDTH / 5, begin.y() + CIRCUIT_HEIGHT / 2),
                             text, editor());
 }
 

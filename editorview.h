@@ -45,9 +45,6 @@ private:
     EditorModel *m_model;
     CircuitViewCollection m_circuitViews;
 
-    int m_width;
-    int m_height;
-    
     std::unique_ptr<ElementAdder> m_adder;
     WireManager m_wireManager;
 signals:

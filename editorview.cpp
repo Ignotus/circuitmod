@@ -13,14 +13,11 @@ EditorView::EditorView(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::DoubleBuffer), parent)
     , m_isWidgetPressed(false)
     , m_model(NULL)
-    , m_width(width())
-    , m_height(height())
     , m_wireManager(this)
 {
     setFocusPolicy(Qt::ClickFocus);
     setMouseTracking(true);
-    
-    glDepthFunc(GL_LEQUAL);
+    setAutoBufferSwap(true);
 }
 
 const EditorView::CircuitViewCollection& EditorView::circuitViews() const
@@ -63,7 +60,7 @@ void EditorView::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0, m_width, m_height, 0, 1, 0);
+    glOrtho(0, width(), height(), 0, 1, 0);
     glEnable(GL_BLEND);
     glEnable(GL_SMOOTH);
     
@@ -82,8 +79,6 @@ void EditorView::paintGL()
         QString name;
         m_wireManager.selectIO(pos, name);
     }
-    
-    swapBuffers();
 }
 
 void EditorView::resizeGL(int width, int height)
@@ -91,9 +86,6 @@ void EditorView::resizeGL(int width, int height)
     glViewport(0, 0, (GLint)width, (GLint)height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-
-    m_width = width;
-    m_height = height;
 }
 
 void EditorView::mousePressEvent(QMouseEvent *e)

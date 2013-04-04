@@ -13,12 +13,6 @@ protected:
     void paintGL();
     void resizeGL(int width, int height);
     
-protected:
-    void moveEvent(QMoveEvent *event);
-    
 private:
-    int m_width;
-    int m_height;
-    
     QMap<int, QVector<bool>> m_data;
 };
