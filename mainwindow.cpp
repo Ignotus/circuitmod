@@ -149,9 +149,9 @@ void MainWindow::simulate()
     if (sndr == NULL)
         return;
     
-    sndr->setChecked(true);
+    if (sndr->isChecked())
+        updateToolbar(true);
     
-    updateToolbar(true);
     m_simuWidget->clearData();
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(sendSignal()));
